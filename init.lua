@@ -44,3 +44,4 @@ require 'lazy'.setup('plugins', {
 })
 
 require 'core.autocmds'
+require('core.keymap').setup()
