@@ -1,9 +1,10 @@
 local conditions = require 'heirline.conditions'
 local utils = require 'heirline.utils'
-local Align = { provider = '%=', hl = { bg = 'bg' } }
-local Space = { provider = ' ' }
+local M = {}
+M.Align = { provider = '%=', hl = { bg = 'bg' } }
+M.Space = { provider = ' ' }
 
-local ViMode = {
+M.ViMode = {
   -- get vim current mode, this information will be required by the provider
   -- and the highlight functions, so we compute it only once per component
   -- evaluation and store it as a component attribute
@@ -100,7 +101,7 @@ local ViMode = {
 }
 
 
-local FileNameBlock = {
+M.FileNameBlock = {
   -- let's first set up some attributes needed by this component and it's children
   init = function(self)
     self.filename = vim.api.nvim_buf_get_name(0)
@@ -108,7 +109,7 @@ local FileNameBlock = {
 }
 -- We can now define some children separately and add them later
 
-local FileIcon = {
+M.FileIcon = {
   init = function(self)
     local filename = self.filename
     local extension = vim.fn.fnamemodify(filename, ':e')
@@ -121,7 +122,7 @@ local FileIcon = {
     return { fg = self.icon_color }
   end,
 }
-local FileName = {
+M.FileName = {
   init = function(self)
     self.lfilename = vim.fn.fnamemodify(self.filename, ':.')
     if self.lfilename == '' then self.lfilename = '[No Name]' end
@@ -142,7 +143,7 @@ local FileName = {
   },
 }
 
-local FileFlags = {
+M.FileFlags = {
   {
     condition = function()
       return vim.bo.modified
@@ -164,7 +165,7 @@ local FileFlags = {
 -- but we'll see how easy it is to alter existing components using a "modifier"
 -- component
 
-local FileNameModifer = {
+M.FileNameModifer = {
   hl = function()
     if vim.bo.modified then
       -- use `force` because we need to override the child's hl foreground
@@ -174,15 +175,15 @@ local FileNameModifer = {
 }
 
 -- let's add the children to our FileNameBlock component
-FileNameBlock = utils.insert(
-        FileNameBlock,
-        FileIcon,
-        utils.insert(FileNameModifer, FileName),
+M.FileNameBlock = utils.insert(
+        M.FileNameBlock,
+        M.FileIcon,
+        utils.insert(M.FileNameModifer, M.FileName),
         -- a new table where FileName is a child of FileNameModifier
         { provider = '%<' }-- this means that the statusline is cut here when there's not enough space
 )
 
-local FileSize = {
+M.FileSize = {
   provider = function()
     -- stackoverflow, compute human readable file size
     local suffix = { 'b', 'k', 'M', 'G', 'T', 'P', 'E' }
@@ -198,14 +199,14 @@ local FileSize = {
   hl = { bg = 'bg' },
 }
 
-local FileType = {
+M.FileType = {
   provider = function()
     return string.upper(vim.bo.filetype)
   end,
   hl = { fg = utils.get_highlight 'Type'.fg, bold = true },
 }
 
-local Ruler = {
+M.Ruler = {
   -- %l = current line number
   -- %L = number of lines in the buffer
   -- %c = column number
@@ -213,7 +214,7 @@ local Ruler = {
   provider = '%3(%l%):%2c %P',
 }
 
-local ScrollBar = {
+M.ScrollBar = {
   static = {
     sbar = { '🭶', '🭷', '🭸', '🭹', '🭺', '🭻' },
   },
@@ -226,7 +227,7 @@ local ScrollBar = {
   hl = { fg = 'blue' },
 }
 
-local Diagnostics = {
+M.Diagnostics = {
 
   condition = conditions.has_diagnostics,
 
@@ -245,6 +246,15 @@ local Diagnostics = {
   end,
 
   update = { 'DiagnosticChanged', 'BufEnter' },
+
+  on_click = {
+    callback = function()
+      require 'trouble'.toggle { mode = 'document_diagnostics' }
+      -- or
+      -- vim.diagnostic.setqflist()
+    end,
+    name = 'heirline_diagnostics',
+  },
 
   {
     provider = function(self)
@@ -273,7 +283,7 @@ local Diagnostics = {
   },
 }
 
-local WorkDir = {
+M.WorkDir = {
   init = function(self)
     self.icon = (vim.fn.haslocaldir(0) == 1 and 'l' or 'g') .. ' ' .. ' '
     local cwd = vim.fn.getcwd(0)
@@ -303,7 +313,7 @@ local WorkDir = {
     provider = '',
   },
 }
-local SearchResults = {
+M.SearchResults = {
   condition = function(self)
     local lines = vim.api.nvim_buf_line_count(0)
     if lines > 50000 then return end
@@ -335,10 +345,10 @@ local SearchResults = {
     end,
     hl = nil, -- your highlight goes here
   },
-  Space, -- A separator after, if section is active, without highlight.
+  M.Space, -- A separator after, if section is active, without highlight.
 }
 
-local TerminalName = {
+M.TerminalName = {
   -- we could add a condition to check that buftype == 'terminal'
   -- or we could do that later (see #conditional-statuslines below)
   provider = function()
@@ -349,7 +359,7 @@ local TerminalName = {
 }
 
 
-local TablineBufnr = {
+M.TablineBufnr = {
   provider = function(self)
     return tostring(self.bufnr) .. '. '
   end,
@@ -357,7 +367,7 @@ local TablineBufnr = {
 }
 
 -- we redefine the filename component, as we probably only want the tail and not the relative path
-local TablineFileName = {
+M.TablineFileName = {
   provider = function(self)
     -- self.filename will be defined later, just keep looking at the example!
     local filename = self.filename
@@ -372,7 +382,7 @@ local TablineFileName = {
 -- this looks exactly like the FileFlags component that we saw in
 -- #crash-course-part-ii-filename-and-friends, but we are indexing the bufnr explicitly
 -- also, we are adding a nice icon for terminal buffers.
-local TablineFileFlags = {
+M.TablineFileFlags = {
   {
     condition = function(self)
       return vim.api.nvim_buf_get_option(self.bufnr, 'modified')
@@ -397,7 +407,7 @@ local TablineFileFlags = {
 }
 
 -- Here the filename block finally comes together
-local TablineFileNameBlock = {
+M.TablineFileNameBlock = {
   init = function(self)
     self.filename = vim.api.nvim_buf_get_name(self.bufnr)
   end,
@@ -424,14 +434,14 @@ local TablineFileNameBlock = {
     end,
     name = 'heirline_tabline_buffer_callback',
   },
-  TablineBufnr,
-  FileIcon, -- turns out the version defined in #crash-course-part-ii-filename-and-friends can be reutilized as is here!
-  TablineFileName,
-  TablineFileFlags,
+  M.TablineBufnr,
+  M.FileIcon, -- turns out the version defined in #crash-course-part-ii-filename-and-friends can be reutilized as is here!
+  M.TablineFileName,
+  M.TablineFileFlags,
 }
 
 -- a nice "x" button to close the buffer
-local TablineCloseButton = {
+M.TablineCloseButton = {
   condition = function(self)
     return not vim.api.nvim_buf_get_option(self.bufnr, 'modified')
   end,
@@ -452,23 +462,23 @@ local TablineCloseButton = {
 }
 
 -- The final touch!
-local TablineBufferBlock = utils.surround({ '', '' }, function(self)
+M.TablineBufferBlock = utils.surround({ '', '' }, function(self)
   if self.is_active then
     return utils.get_highlight 'TabLineSel'.bg
   else
     return utils.get_highlight 'TabLine'.bg
   end
-end, { TablineFileNameBlock, TablineCloseButton })
+end, { M.TablineFileNameBlock, M.TablineCloseButton })
 
 -- and here we go
-local BufferLine = utils.make_buflist(
-    TablineBufferBlock,
+M.BufferLine = utils.make_buflist(
+    M.TablineBufferBlock,
     { provider = '', hl = { fg = 'gray' } }, -- left truncation, optional (defaults to "<")
     { provider = '', hl = { fg = 'gray' } }-- right trunctation, also optional (defaults to ...... yep, ">")
 -- by the way, open a lot of buffers and try clicking them ;)
 )
 
-local TabLineOffset = {
+M.TabLineOffset = {
   condition = function(self)
     local win = vim.api.nvim_tabpage_list_wins(0)[1]
     local bufnr = vim.api.nvim_win_get_buf(win)
@@ -498,7 +508,7 @@ local TabLineOffset = {
   end,
 }
 
-local Tabpage = {
+M.Tabpage = {
   provider = function(self)
     return '%' .. self.tabnr .. 'T ' .. self.tabpage .. ' %T'
   end,
@@ -511,48 +521,19 @@ local Tabpage = {
   end,
 }
 
-local TabpageClose = {
+M.TabpageClose = {
   provider = '%999X  %X',
   hl = 'TabLine',
 }
 
-local TabPages = {
+M.TabPages = {
   -- only show this component if there's 2 or more tabpages
   condition = function()
     return #vim.api.nvim_list_tabpages() >= 2
   end,
   { provider = '%=' },
-  utils.make_tablist(Tabpage),
-  TabpageClose,
+  utils.make_tablist(M.Tabpage),
+  M.TabpageClose,
 }
 
-local export = {
-  Space = Space,
-  Align = Align,
-  FileName = FileName,
-  FileIcon = FileIcon,
-  FileSize = FileSize,
-  FileFlags = FileFlags,
-  FileType = FileType,
-  FileNameBlock = FileNameBlock,
-  FileNameModifer = FileNameModifer,
-  TabpageClose = TabpageClose,
-  Tabpage = Tabpage,
-  TabPages = TabPages,
-  ViMode = ViMode,
-  Ruler = Ruler,
-  ScrollBar = ScrollBar,
-  Diagnostics = Diagnostics,
-  WorkDir = WorkDir,
-  SearchResults = SearchResults,
-  TerminalName = TerminalName,
-  BufferLine = BufferLine,
-  TabLineOffset = TabLineOffset,
-  TablineBufnr = TablineBufnr,
-  TablineFileName = TablineFileName,
-  TablineFileFlags = TablineFileFlags,
-  TablineBufferBlock = TablineBufferBlock,
-  TablineCloseButton = TablineCloseButton,
-  TablineFileNameBlock = TablineFileNameBlock,
-}
-return export
+return M
