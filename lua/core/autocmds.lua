@@ -71,12 +71,12 @@ autocmd({ 'FileType' }, {
   end,
 })
 
-autocmd('TextYankPost', {
+autocmd({ 'TextYankPost', 'TextPutPost' }, {
   desc = 'Highlight yanked text',
   group = augroup('highlightyank'),
   pattern = '*',
   callback = function()
-    vim.highlight.on_yank()
+    vim.hl.hl_op { higroup = 'Visual', timeout = 300 }
   end,
 })
 

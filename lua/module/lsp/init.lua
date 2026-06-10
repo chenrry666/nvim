@@ -116,11 +116,12 @@ local on_attach = function(client, bufnr)
       add_buffer_autocmd('lsp_codelens_refresh', bufnr, {
         events = { 'InsertLeave', 'BufEnter' },
         callback = function()
-          if vim.g.codelens_enabled then vim.lsp.codelens.refresh() end
+          if vim.g.codelens_enabled then vim.lsp.codelens.enable(true, { bufnr = bufnr }) end
         end,
       })
-      vim.lsp.codelens.refresh()
-      map('n', '<leader>el', function() vim.lsp.codelens.refresh() end, { desc = 'LSP CodeLens refresh' })
+      vim.lsp.codelens.enable(true, { bufnr = bufnr })
+      map('n', '<leader>el', function() vim.lsp.codelens.enable(true, { bufnr = bufnr }) end,
+        { desc = 'LSP CodeLens refresh' })
       map('n', '<leader>eL', function() vim.lsp.codelens.run() end, { desc = 'LSP CodeLens run' })
     end
   end

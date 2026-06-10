@@ -128,6 +128,7 @@ return {
   {
     -- my own fork
     'chemio9/luasnip-latex-snippets.nvim',
+    dev = true,
     lazy = false,
     config = function()
       require 'luasnip-latex-snippets'.setup({ use_treesitter = true })
