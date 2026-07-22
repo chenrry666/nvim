@@ -1,7 +1,7 @@
-local LAZYPATH = vim.fn.getenv 'HOME' .. '/.cache/lazy_nvim'
+local LAZYPATH = vim.env.HOME .. '/.cache/lazy_nvim'
 local LAZYREPO = 'https://github.com/folke/lazy.nvim.git'
 if not vim.uv.fs_stat(LAZYPATH) then
-  vim.system({ 'mkdir', '-pv', LAZYPATH .. '/lazy.nvim' })
+  vim.system({ 'mkdir', '-pv', LAZYPATH .. '/lazy.nvim' }):wait()
   vim.system({
     'git',
     'clone',

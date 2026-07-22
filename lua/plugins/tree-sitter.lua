@@ -1,12 +1,18 @@
 ---@type LazySpec[]
 return {
   {
-    'nvim-treesitter/nvim-treesitter',
+    'neovim-treesitter/nvim-treesitter',
     branch = 'main',
     lazy = false,
+    dependencies = { 'neovim-treesitter/treesitter-parser-registry', lazy = false },
     build = ':TSUpdate',
     cmd = { 'TSUpdateSync', 'TSUpdate', 'TSInstall' },
     init = function()
+      require('nvim-treesitter').setup {
+        -- parsers and queries are installed here (prepended to runtimepath)
+        install_dir = vim.fn.stdpath('data') .. '/site',
+      }
+
       require 'module.tree-sitter'
       local disable = function(lang, buf)
         local max_filesize = 1024 * 1024 -- 1MiB
@@ -42,7 +48,12 @@ return {
   },
 
   {
-    'JoosepAlviste/nvim-ts-context-commentstring',
-    config = true,
+    'folke/ts-comments.nvim',
+    opts = {
+      lang = {
+        ledger = '; %s',
+      },
+    },
+    event = 'VeryLazy',
   },
 }

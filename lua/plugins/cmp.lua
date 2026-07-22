@@ -132,9 +132,7 @@ local plugin = {
       { 'gb',  mode = { 'v', 'o' } },
       { 'gcc', mode = { 'n' } },
     },
-    config = function()
-      require 'module.cmp.comment'
-    end,
+    config = true,
   },
 
   {
