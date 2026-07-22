@@ -1,0 +1,18 @@
+{
+  "name": "nvim",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module",
+  "dependencies": {
+    "@astrojs/language-server": "^2.16.10",
+    "@mdx-js/language-server": "^0.6.3",
+    "@unocss/language-server": "^66.7.0",
+    "@vtsls/language-server": "^0.3.0",
+    "@vue/language-server": "^3.3.4",
+    "vscode-langservers-extracted": "^4.10.0",
+    "yaml-language-server": "^1.23.0"
+  }
+}

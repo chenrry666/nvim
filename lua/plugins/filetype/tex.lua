@@ -131,7 +131,7 @@ return {
     dev = true,
     lazy = false,
     config = function()
-      require 'luasnip-latex-snippets'.setup({ use_treesitter = true })
+      require 'luasnip-latex-snippets'.setup({ use_treesitter = true, allow_on_markdown = false })
     end,
   },
 

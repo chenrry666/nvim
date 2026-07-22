@@ -43,10 +43,10 @@ local plugin = {
 
       -- (Default) Only show the documentation popup when manually triggered
       completion = {
-        documentation = { auto_show = false },
+        documentation = { auto_show = true },
 
         ghost_text = {
-          enabled = true,
+          enabled = false,
         },
 
         accept = { auto_brackets = { enabled = true } },
@@ -93,13 +93,19 @@ local plugin = {
       },
 
       sources = {
-        default = { 'lazydev', 'lsp', 'path', 'snippets', 'buffer' },
+        default = { 'lazydev', 'ledger', 'lsp', 'path', 'snippets', 'buffer' },
 
         providers = {
           lazydev = {
             name = 'LazyDev',
             module = 'lazydev.integrations.blink',
             -- make lazydev completions top priority (see `:h blink.cmp`)
+            score_offset = 100,
+          },
+
+          ledger = {
+            name = 'ledger',
+            module = 'blink.compat.source',
             score_offset = 100,
           },
         },
@@ -123,6 +129,16 @@ local plugin = {
       },
     },
     opts_extend = { 'sources.default' },
+  },
+
+  {
+    'saghen/blink.compat',
+    -- use v2.* for blink.cmp v1.*
+    version = '2.*',
+    -- lazy.nvim will automatically load the plugin when it's required by blink.cmp
+    lazy = true,
+    -- make sure to set opts so that lazy.nvim calls blink.compat's setup
+    opts = {},
   },
 
   {
