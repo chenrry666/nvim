@@ -2,25 +2,24 @@ local LAZYPATH = vim.env.HOME .. '/.cache/lazy_nvim'
 local LAZYREPO = 'https://github.com/folke/lazy.nvim.git'
 if not vim.uv.fs_stat(LAZYPATH) then
   vim.system({ 'mkdir', '-pv', LAZYPATH .. '/lazy.nvim' }):wait()
-  vim.system({
+  local out = vim.system({
     'git',
     'clone',
     LAZYREPO,
     '--filter=blob:none',
     '--branch=stable', -- latest stable release
     LAZYPATH .. '/lazy.nvim',
-  }, {}, function(out)
-    if out.code ~= 0 then
-      vim.api.nvim_echo({
-        { 'Failed to clone lazy.nvim:\n', 'ErrorMsg' },
-        { out.stdout,                     'WarningMsg' },
-        { out.stderr,                     'WarningMsg' },
-        { '\nPress any key to exit...' },
-      }, true, {})
-      vim.fn.getchar()
-      os.exit(1)
-    end
-  end)
+  }):wait()
+  if out.code ~= 0 then
+    vim.api.nvim_echo({
+      { 'Failed to clone lazy.nvim:\n', 'ErrorMsg' },
+      { out.stdout,                     'WarningMsg' },
+      { out.stderr,                     'WarningMsg' },
+      { '\nPress any key to exit...' },
+    }, true, {})
+    vim.fn.getchar()
+    os.exit(1)
+  end
 end
 vim.opt.rtp:prepend(LAZYPATH .. '/lazy.nvim')
 
